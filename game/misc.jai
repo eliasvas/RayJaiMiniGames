@@ -1,38 +1,67 @@
 #import "Math";
+
+/////////////////////////////////
+// Funky Text
+/////////////////////////////////
+
 FunkyText :: struct {
 	text : string;
 	rotation : float;
+	rot_mod :float = 7.0;
 
 	target_pos : Vector2;
 	pos : Vector2;
 	delta : float = 1.0;
 };
 
-funkytext_set_ingame :: (t : *FunkyText) {
+funkytext_set_ingame :: (t : *FunkyText, reset_animations : bool = true) {
 	using t;
+	rot_mod = 6.0;
 	text = "Try Not to Die!";
 	target_pos = Vector2.{GetScreenWidth()/2.0,20};
-	delta = 0.0;
+	if reset_animations then delta = 0.0;
 }
 
-funkytext_set_menu :: (t : *FunkyText) {
+funkytext_set_score :: (t : *FunkyText, reset_animations : bool = true) {
 	using t;
+	rot_mod = 0.0;
+	text = tprint("%\0", score);
+	target_pos = Vector2.{20,0};
+	if reset_animations then delta = 0.0;
+}
+
+funkytext_set_menu :: (t : *FunkyText, reset_animations : bool = true) {
+	using t;
+	rot_mod = 7.0;
 	text = "Press Space to Play!";
 	target_pos = Vector2.{GetScreenWidth()/2.0,GetScreenHeight()/2.0};
-	delta = 0.0;
+	if reset_animations then delta = 0.0;
 }
 
 funkytext_render :: (t : *FunkyText) {
 	using t;
 	FONT_SIZE :: 40;
-	delta += GetFrameTime();
+	delta = min(1.0, delta+GetFrameTime());
 	col := LIGHTGRAY;
-	pos = pos + (target_pos - pos) * delta;
+	pos = pos + (target_pos - pos)*delta;
 
 	dim := MeasureText(text.data, FONT_SIZE);
 	//DrawTextPro(GetFontDefault(), text.data, xx .{(windim.x-dim)/2, 20}, xx .{(windim.x-dim)/2, 20}, 0, 40, 5,LIGHTGRAY);
 	posi := Vector2.{GetScreenWidth()/2.0,20};
 	origin := Vector2.{dim/2.0,0};
-	DrawTextPro(GetFontDefault(), text.data,pos,origin,cast(float)sin(GetTime()*7)*5.0, FONT_SIZE, 5,LIGHTGRAY);
+	DrawTextPro(GetFontDefault(), text.data,pos,origin,cast(float)sin(GetTime()*rot_mod)*5.0, FONT_SIZE, 5,LIGHTGRAY);
 }
+
+
+
+/////////////////////////////////
+// Game State
+/////////////////////////////////
+
+GameState :: enum {
+	MENU;
+	ANIMATING;
+	MAKE_MOVE;
+};
+
 
