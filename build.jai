@@ -4,10 +4,6 @@
 #run build();
 
 build :: () {
-   {
-      w2 := get_current_workspace();
-      print("the current workspace is %\n", w2);
-   }
 
    {
       w := compiler_create_workspace();

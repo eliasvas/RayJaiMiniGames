@@ -22,14 +22,6 @@ funkytext_set_ingame :: (t : *FunkyText, reset_animations : bool = true) {
 	if reset_animations then delta = 0.0;
 }
 
-funkytext_set_score :: (t : *FunkyText, reset_animations : bool = true) {
-	using t;
-	rot_mod = 0.0;
-	text = tprint("%\0", score);
-	target_pos = Vector2.{20,0};
-	if reset_animations then delta = 0.0;
-}
-
 funkytext_set_menu :: (t : *FunkyText, reset_animations : bool = true) {
 	using t;
 	rot_mod = 7.0;
@@ -60,7 +52,6 @@ funkytext_render :: (t : *FunkyText) {
 
 GameState :: enum {
 	MENU;
-	ANIMATING;
 	MAKE_MOVE;
 };
 
