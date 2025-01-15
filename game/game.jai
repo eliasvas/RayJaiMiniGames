@@ -15,8 +15,11 @@ text : FunkyText;
 gs : GameState = .MENU;
 
 main :: () {
-	InitWindow(600, 400, "Hello Raylib!");
-	SetTargetFPS(60);
+	InitWindow(600, 600, "Snek+");
+	SetWindowMinSize(600,600);
+	SetTargetFPS(144);
+	//SetWindowState(.FLAG_MSAA_4X_HINT | .FLAG_WINDOW_RESIZABLE | .FLAG_WINDOW_UNDECORATED);
+	SetWindowState(.FLAG_MSAA_4X_HINT | .FLAG_WINDOW_RESIZABLE);
 	snek_cam.zoom = 1;
 	funkytext_set_menu(*text, false);
 
@@ -34,11 +37,15 @@ main :: () {
 		
 
 		BeginDrawing();
-		ClearBackground(RAYWHITE);
+		ClearBackground(BEIGE);
 
 
 		if gs != .MENU {
-			//snek_cam.target = Vector2.{cast(float)snek.tile_x*TILE_MODIFIER + ENTITY_SIZE_IN_PX/2.0 - GetScreenWidth()/2.0,cast(float)snek.tile_y*TILE_MODIFIER + ENTITY_SIZE_IN_PX/2.0 - GetScreenHeight()/2.0};
+			w := GetScreenWidth();
+			h := GetScreenHeight();
+			snek_cam.offset.x = (w - 600)/2.0;
+			snek_cam.offset.y = (h - 600)/2.0;
+			snek_cam.zoom = 1.0; //cast(float)(min(w,h) / 600.0);
 			snek_cam.target = Vector2.{0,0};
 			BeginMode2D(*snek_cam);
 
