@@ -1,5 +1,9 @@
 ### Description
-raylib + Jai
+raylib + Jai minigames made for learning purposes. </br>
+I should make some sort of menu to be able to select which, right now we just 'multiplex' in a switch case, </br>
+each minigame is its own source file, just uncomment #load snek.jai, it has init(), update() and render() which is all thats needed </br>
+Its a pretty good reference if you want to see simple Jai code. </br>
+
 
 ### Building
 Generally, you can:

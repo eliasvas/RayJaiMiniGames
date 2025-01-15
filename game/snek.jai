@@ -1,4 +1,70 @@
 #import "Math";
+#import "Basic";
+#import "String";
+#import "File";
+#import "Math";
+#import "Random";
+
+
+
+/////////////////////////////////
+// Globals
+/////////////////////////////////
+
+snek_cam : Camera2D;
+text : FunkyText;
+gs : GameState = .MENU;
+
+init :: () {
+	InitWindow(600, 600, "Snek+");
+	SetWindowMinSize(600,600);
+	SetTargetFPS(144);
+	//SetWindowState(.FLAG_MSAA_4X_HINT | .FLAG_WINDOW_RESIZABLE | .FLAG_WINDOW_UNDECORATED);
+	SetWindowState(.FLAG_MSAA_4X_HINT | .FLAG_WINDOW_RESIZABLE);
+	snek_cam.zoom = 1;
+	funkytext_set_menu(*text, false);
+}
+
+update :: () {
+	if IsKeyDown(.KEY_A) {
+		lose();
+	}
+
+	if IsKeyDown(.KEY_SPACE) {
+		gs = .MAKE_MOVE;
+		funkytext_set_ingame(*text);
+	}
+	food_update();
+	snek_update(*snek);
+	
+
+	BeginDrawing();
+	ClearBackground(BEIGE);
+
+
+	if gs != .MENU {
+		w := GetScreenWidth();
+		h := GetScreenHeight();
+		snek_cam.offset.x = (w - 600)/2.0;
+		snek_cam.offset.y = (h - 600)/2.0;
+		snek_cam.zoom = 1.0; //cast(float)(min(w,h) / 600.0);
+		snek_cam.target = Vector2.{0,0};
+		BeginMode2D(*snek_cam);
+
+		draw_map();
+		food_render();
+		snek_render(*snek);
+	}
+
+	EndMode2D();
+
+
+
+	funkytext_render(*text);
+	EndDrawing();
+}
+render :: () {}
+
 
 iv2 :: struct {
 	x : s32;
@@ -190,6 +256,9 @@ entity_draw_smooth_head :: (t:Vector2) {
 }
 
 
+/////////////////////////////////
+// Map 
+/////////////////////////////////
 
 MAP_DIM :: 12;
 draw_map :: () {
@@ -204,3 +273,66 @@ draw_map :: () {
     }
   }
 }
+
+
+/////////////////////////////////
+// Funky Text
+/////////////////////////////////
+
+FunkyText :: struct {
+	text : string;
+	rotation : float;
+	rot_mod :float = 7.0;
+
+	target_pos : Vector2;
+	pos : Vector2;
+	delta : float = 1.0;
+};
+
+funkytext_set_ingame :: (t : *FunkyText, reset_animations : bool = true) {
+	using t;
+	rot_mod = 6.0;
+	text = "Try Not to Die!";
+	target_pos = Vector2.{GetRenderWidth()/2.0,20};
+	if reset_animations then delta = 0.0;
+}
+
+funkytext_set_menu :: (t : *FunkyText, reset_animations : bool = true) {
+	using t;
+	rot_mod = 7.0;
+	text = "Press Space to Play!";
+	target_pos = Vector2.{GetRenderWidth()/2.0,GetScreenHeight()/2.0};
+	if reset_animations then delta = 0.0;
+}
+
+funkytext_render :: (t : *FunkyText) {
+	using t;
+	FONT_SIZE :: 40;
+	if rot_mod == 7.0 {
+		target_pos = Vector2.{GetRenderWidth()/2.0,GetScreenHeight()/2.0};
+	}else {
+		target_pos = Vector2.{GetRenderWidth()/2.0,20};
+	}
+	delta = min(1.0, delta+GetFrameTime());
+	col := RAYWHITE;
+	pos = pos + (target_pos - pos)*delta;
+
+	dim := MeasureText(text.data, FONT_SIZE);
+	//DrawTextPro(GetFontDefault(), text.data, xx .{(windim.x-dim)/2, 20}, xx .{(windim.x-dim)/2, 20}, 0, 40, 5,LIGHTGRAY);
+	posi := Vector2.{GetScreenWidth()/2.0,20};
+	origin := Vector2.{dim/2.0,0};
+	DrawTextPro(GetFontDefault(), text.data,pos,origin,cast(float)sin(GetTime()*rot_mod)*5.0, FONT_SIZE, 5,col);
+}
+
+
+
+/////////////////////////////////
+// Game State
+/////////////////////////////////
+
+GameState :: enum {
+	MENU;
+	MAKE_MOVE;
+};
+
+
