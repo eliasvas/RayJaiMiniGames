@@ -4,7 +4,16 @@
 #import "File";
 #import "Math";
 #import "Random";
+#import "raylib";
 
+
+main :: () {
+	init();
+	while !WindowShouldClose() {
+		update();
+		render();
+	}
+}
 
 
 /////////////////////////////////
