@@ -27,9 +27,10 @@ gs : GameState = .MENU;
 init :: () {
 	InitWindow(600, 600, "Snek+");
 	SetWindowMinSize(600,600);
+
 	SetTargetFPS(144);
 	//SetWindowState(.FLAG_MSAA_4X_HINT | .FLAG_WINDOW_RESIZABLE | .FLAG_WINDOW_UNDECORATED);
-	SetWindowState(.FLAG_MSAA_4X_HINT | .FLAG_WINDOW_RESIZABLE);
+	SetWindowState(.FLAG_MSAA_4X_HINT | .FLAG_WINDOW_RESIZABLE | .FLAG_WINDOW_ALWAYS_RUN);
 	snek_cam.zoom = 1;
 	funkytext_set_menu(*text, false);
 }
