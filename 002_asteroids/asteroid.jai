@@ -1,10 +1,3 @@
-Vector2Rotate :: (v: Vector2, angle: float) -> Vector2 #foreign raylib_native;
-Vector2Add :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
-Vector2Subtract :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
-Vector2Divide :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
-Vector2Normalize :: (v: Vector2) -> Vector2 #foreign raylib_native;
-
-
 Asteroid :: struct {
 	pos : Vector2;
 	vel : Vector2;
@@ -36,16 +29,11 @@ asteroid_update :: (using a : *Asteroid, delta : float) {
 
 
 AsteroidManager :: struct {
-	spawn_radius : float;
+	spawn_radius : float =100.0;
 	MAX_ASTEROIDS :: 1024 * 1000;
 	asteroids : [MAX_ASTEROIDS]Asteroid;
 }
 
-asteroid_manager_clear :: (using manager : *AsteroidManager) {
-	for *a : asteroids {
-		a.active = false;
-	}
-}
 asteroid_manager_render :: (using manager : *AsteroidManager) {
 	for *a : asteroids {
 		if a.active {
@@ -54,10 +42,20 @@ asteroid_manager_render :: (using manager : *AsteroidManager) {
 	}
 }
 
+asteroid_manager_reset :: (using manager : *AsteroidManager) {
+	for *a : asteroids {
+		a.active = false;
+	}
+}
+
 asteroid_manager_update :: (using manager : *AsteroidManager, delta : float) {
 	for *a : asteroids {
 		if a.active {
 			asteroid_update(a, delta);
+
+			wdim := Vector2.{cast(float)GetScreenWidth(), cast(float)GetScreenHeight()};
+			mp := Vector2Divide(wdim, .{2,2});
+			if Vector2Length(Vector2Subtract(a.pos , mp)) > Vector2Length(wdim) then a.active = false;
 		}
 	}
 }
@@ -71,15 +69,33 @@ asteroid_manager_add :: (using manager : *AsteroidManager, a : Asteroid) {
 	} 
 }
 
+collapse_position :: (pos : Vector2, bounds : Vector2) -> Vector2{
+	p := pos;
+	if GetRandomValue(0,1) > 0 {
+		if GetRandomValue(0,1) > 0 {
+			p.x = 0;
+		}else {
+			p.x = bounds.x;
+		}
+	}else {
+		if GetRandomValue(0,1) > 0 {
+			p.y = 0;
+		}else {
+			p.y = bounds.y;
+			
+		}
+	}
+	return p;
+}
 
 asteroid_manager_spawn :: (using manager : *AsteroidManager) {
 	wdim := Vector2.{cast(float)GetScreenWidth(), cast(float)GetScreenHeight()};
-	if IsMouseButtonDown(0) { 
+	if GetRandomValue(0,60) == 0 { 
 		pos := Vector2.{cast(float)GetRandomValue(0,cast(s32)wdim.x), cast(float)GetRandomValue(0, cast(s32)wdim.y)};
-		// todo: collapse this to edges
+		pos = collapse_position(pos, wdim);
 		point := Vector2Rotate(Vector2.{cast(float)GetRandomValue(0,cast(s32)spawn_radius),0.0}, cast(float)GetRandomValue(0, 360));
-		point = Vector2Add(Vector2Subtract(Vector2Divide(wdim, .{2,2}), point), pos);
-		vel := Vector2Normalize(Vector2Subtract(pos,point)) * 10;
+		point = Vector2Subtract(Vector2Add(Vector2Divide(wdim, .{2,2}), point), pos);
+		vel := Vector2Normalize(point) * 100;
 
 		asteroid_manager_add(manager, asteroid_make(pos, vel));
 	}
