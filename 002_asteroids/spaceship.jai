@@ -1,6 +1,3 @@
-DEG2RAD :: PI/180.0;
-RAD2DEG :: 180*PI;
-
 Spaceship :: struct {
 	pos : Vector2;
 	rot : float = 0.0;
@@ -75,8 +72,9 @@ projectile_manager_update :: (using pm : *ProjectileManager, delta : float) {
 		if p.active {
 			p.pos = Vector2Add(p.pos, Vector2Scale(p.vel, delta));
 			wdim := Vector2.{cast(float)GetScreenWidth(), cast(float)GetScreenHeight()};
-			mp := Vector2Divide(wdim, .{2,2});
-			if Vector2Length(Vector2Subtract(p.pos , mp)) > Vector2Length(wdim) then p.active = false;
+			
+			mp_world := GetScreenToWorld2D(Vector2Divide(wdim, .{2,2}), cam);
+			if Vector2Length(Vector2Subtract(p.pos , mp_world)) > Vector2Length(wdim)*cam.zoom then p.active = false;
 			for *a : manager.asteroids {
 				if a.active {
 					if CheckCollisionCircles(p.pos, 10, a.pos, 10) {

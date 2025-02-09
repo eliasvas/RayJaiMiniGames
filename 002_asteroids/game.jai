@@ -4,15 +4,7 @@
 #import "File";
 #import "Math";
 #import "Random";
-#import "raylib";
-
-Vector2Rotate :: (v: Vector2, angle: float) -> Vector2 #foreign raylib_native;
-Vector2Scale :: (v: Vector2, angle: float) -> Vector2 #foreign raylib_native;
-Vector2Add :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
-Vector2Subtract :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
-Vector2Divide :: (v1: Vector2, v2: Vector2) -> Vector2 #foreign raylib_native;
-Vector2Normalize :: (v: Vector2) -> Vector2 #foreign raylib_native;
-Vector2Length :: (v: Vector2) -> float #foreign raylib_native;
+#import "raylib5";
 
 #load "asteroid.jai";
 manager : AsteroidManager;
@@ -20,6 +12,7 @@ manager : AsteroidManager;
 #load "spaceship.jai";
 spaceship : Spaceship;
 pm : ProjectileManager;
+cam : Camera2D; 	
 
 main :: () {
 	init();
@@ -41,7 +34,7 @@ reset :: () {
 	asteroid_manager_reset(*manager);
 	projectile_manager_reset(*pm);
 	wdim := Vector2.{cast(float)GetScreenWidth(), cast(float)GetScreenHeight()};
-	spaceship.pos = Vector2Divide(wdim, .{2,2});
+	spaceship.pos = Vector2.{};
 }
 update :: () {
 	//if IsMouseButtonDown(0) { asteroid_manager_add(*manager, asteroid_make(GetMousePosition())); }
@@ -52,11 +45,16 @@ update :: () {
 	spaceship_update(*spaceship, GetFrameTime());
 }
 render :: () {
+
+	wdim := Vector2.{cast(float)GetScreenWidth(), cast(float)GetScreenHeight()};
+	cam = Camera2D.{offset = Vector2Divide(wdim, .{2,2}), target = spaceship.pos, rotation = -spaceship.rot, zoom = 1.0};
 	BeginDrawing();
+	BeginMode2D(cam);
 	ClearBackground(SKYBLUE);
 	asteroid_manager_render(*manager);
 	projectile_manager_render(*pm);
 	spaceship_render(*spaceship);
+	EndMode2D();
 	EndDrawing();
 }
 

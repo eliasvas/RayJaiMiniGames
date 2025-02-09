@@ -54,8 +54,8 @@ asteroid_manager_update :: (using manager : *AsteroidManager, delta : float) {
 			asteroid_update(a, delta);
 
 			wdim := Vector2.{cast(float)GetScreenWidth(), cast(float)GetScreenHeight()};
-			mp := Vector2Divide(wdim, .{2,2});
-			if Vector2Length(Vector2Subtract(a.pos , mp)) > Vector2Length(wdim) then a.active = false;
+			mp_world := GetScreenToWorld2D(Vector2Divide(wdim, .{2,2}), cam);
+			if Vector2Length(Vector2Subtract(a.pos , mp_world)) > Vector2Length(wdim)*cam.zoom then a.active = false;
 		}
 	}
 }
@@ -97,6 +97,8 @@ asteroid_manager_spawn :: (using manager : *AsteroidManager) {
 		point = Vector2Subtract(Vector2Add(Vector2Divide(wdim, .{2,2}), point), pos);
 		vel := Vector2Normalize(point) * 100;
 
-		asteroid_manager_add(manager, asteroid_make(pos, vel));
+		world_pos := GetScreenToWorld2D(pos, cam);
+
+		asteroid_manager_add(manager, asteroid_make(world_pos, vel));
 	}
 }
