@@ -8,8 +8,7 @@
 
 #load "gui.jai";
 
-// all this is just me trying out some casey article about GUI design / semantic compression
-// ref: https://caseymuratori.com/blog_0015
+panel : Panel;
 
 main :: () {
 	init();
@@ -26,20 +25,23 @@ init :: () {
 
 	SetRandomSeed(xx GetTime());
 	gui_init();
+	panel = Panel.{
+		x = 100,
+		y = 100,
+		width = 200,
+		title = "MyPanel",
+	};
 }
 
 update :: () {
 	gui_update();
 }
+
 render :: () {
 	wdim := Vector2.{cast(float)GetScreenWidth(), cast(float)GetScreenHeight()};
 	BeginDrawing();
-	ClearBackground(SKYBLUE);
-	//if gui_button(10, "Doom", .{5,100,405,200}) then print("Doom triggered!\n");
-	//if gui_button(12, "Boop", .{400,400,100,200}) then print("Boop triggered!\n");
-
-
-	gui_test_panel(50,100,500,200);
+	ClearBackground(BLACK);
+	gui_test_panel(*panel);
 	EndDrawing();
 }
 

@@ -1,12 +1,20 @@
 
+// This gui system is based on casey's articles on semantic compression
+// ref: https://caseymuratori.com/blog_0015 - 22
+
+// todo: maybe I should strip the raylib part out and have it 
+// in a gui_impl.jai - so I don't need raylib for this to work and it can be a generic piece of code
+
+
 
 GUI_INVALID_ID :: 666;
 GuiState :: struct {
 	hot : u32;
 	active : u32;
+	BACKGROUND_COLOR :: DARKGRAY;
 	CONTROL_COLOR :: LIGHTGRAY;
 	HOT_COLOR :: GRAY;
-	ACTIVE_COLOR :: DARKGRAY;
+	ACTIVE_COLOR :: BLACK;
 }
 gui_state : GuiState;
 
@@ -47,17 +55,36 @@ gui_button :: (id : u32, text : string, coords : Rectangle) -> bool {
 	return res;
 }
 
+Panel :: struct {
+	x      : float;
+	y      : float;
+	width  : float;	
+	height : float;	
+	title  : string;
+}
+
 PanelLayout :: struct {
 	width : float;
 	row_height : float;
+	total_height : float;
 	at_x : float;
 	at_y : float;
 	ypad : s32 = 5;
 
-	DEF_ROW_HEIGHT :: 70;
-	TITLE_HEIGHT :: 100;
+	DEF_ROW_HEIGHT :: 30;
+	TITLE_HEIGHT :: 40;
 }
 
+
+panel_layout_make :: (p : *Panel) ->PanelLayout {
+	return PanelLayout.{
+		width = p.width,
+		row_height = PanelLayout.DEF_ROW_HEIGHT,
+		at_x = p.x,
+		at_y = p.y,
+		ypad = 5
+	};
+}
 panel_layout_advance_row :: (using layout : *PanelLayout) {
 	at_y += row_height;
 }
@@ -65,28 +92,42 @@ panel_layout_add_title :: (using layout : *PanelLayout, title : string) {
 	DrawText(title.data, cast(s32)at_x, cast(s32)at_y, TITLE_HEIGHT, RAYWHITE);
 	at_y += TITLE_HEIGHT;
 }
+panel_layout_complete :: (using layout : *PanelLayout, panel : *Panel) {
+	panel.height = layout.at_y - panel.y;	
+}
+panel_layout_push_button :: (using layout : *PanelLayout, id : u32, text : string) -> bool {
+	return gui_button(id, text, .{at_x,at_y,width,row_height});
+}
 
 
-gui_test_panel :: (x : float, y : float, w : float, h : float) {
-	title_text :string= "TestPanel";
-	layout := PanelLayout.{
-		at_x = x,
-		at_y = y,
-		row_height = PanelLayout.DEF_ROW_HEIGHT,
-		width = w,
-	};
-	num_categories := 2;
-	total_height := num_categories * (layout.row_height+layout.ypad) + PanelLayout.TITLE_HEIGHT;
-	DrawRectangle(cast(s32)x, cast(s32)y, cast(s32)w, cast(s32)total_height, DARKBROWN);
+gui_test_panel :: (panel : *Panel) {
+	layout := panel_layout_make(panel);
 
-	panel_layout_add_title(*layout, "myPanel");
+	DrawRectangle(cast(s32)panel.x, cast(s32)panel.y, cast(s32)panel.width, cast(s32)panel.height, gui_state.BACKGROUND_COLOR);
+	panel_layout_add_title(*layout, panel.title);
 
 
-	if gui_button(10, "Doom", .{layout.at_x,layout.at_y,layout.width,layout.row_height}) then print("Doom triggered!\n");
+	if panel_layout_push_button (*layout, 10, "Doom") {
+		print("Doom Triggered!");
+	}
 	panel_layout_advance_row(*layout);
-	
-	if gui_button(12, "Boop", .{layout.at_x,layout.at_y,layout.width,layout.row_height}) then print("Boop triggered!\n");
+	if panel_layout_push_button (*layout, 11, "Noom") {
+		print("Noom Triggered!");
+	}
 	panel_layout_advance_row(*layout);
+	if panel_layout_push_button (*layout, 12, "Boom") {
+		print("Boom Triggered!");
+	}
+	panel_layout_advance_row(*layout);
+	if panel_layout_push_button (*layout, 13, "Zoom") {
+		print("Zoom Triggered!");
+	}
+	panel_layout_advance_row(*layout);
+
+
+
+	// will calc final height (of panel)
+	panel_layout_complete(*layout, panel);
 
 }
 
